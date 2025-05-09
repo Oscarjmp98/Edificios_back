@@ -7,12 +7,13 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
+// Cargar variables de entorno
+dotenv.config();
+
 // Obtener el directorio actual
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Cargar variables de entorno
-dotenv.config();
 
 // Verificar configuración de OpenAI
 if (!process.env.OPENAI_API_KEY) {
