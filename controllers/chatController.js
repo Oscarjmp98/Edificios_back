@@ -85,24 +85,43 @@ export const generateChatResponse = async (req, res) => {
           }
         }
       },
-      { $limit: 1 }
+      { $limit: 3 } // puedes ajustar el límite según tus necesidades
     ]);
 
     let response;
 
     if (aulas.length > 0) {
-      response = JSON.stringify(aulas[0]);
-    } else {
+  const aula = aulas[0];
+
+  const contextText = `Salón: ${aula.nombre_salon}, Edificio: ${aula.edificio}, Piso: ${aula.piso}, Capacidad: ${aula.capacidad_nominal}, Equipamiento: ${aula.equipamiento_tecnologico}, Comentarios: ${aula.comentarios || "Ninguno"}`;
+
+  const aiResponse = await openai.chat.completions.create({
+    model: "gpt-4",
+    messages: [
+      {
+        role: "system",
+        content: "Responde de forma clara y amigable al usuario usando la siguiente información del salón disponible."
+      },
+      {
+        role: "user",
+        content: `Con base en esta información: ${contextText}, responde a la siguiente pregunta: ${prompt}`
+      }
+    ]
+  });
+
+  response = aiResponse.choices[0]?.message?.content || "No encontré una respuesta adecuada.";
+} else {
+      // Si no se encuentran aulas relevantes, usa solo el prompt original
       const aiResponse = await openai.chat.completions.create({
         model: "gpt-4",
         messages: [{ role: "user", content: prompt }],
       });
 
       response = aiResponse.choices[0]?.message?.content || "No encontré una respuesta adecuada.";
-
-      const newConversation = new Conversation({ prompt, response });
-      await newConversation.save();
     }
+
+    const newConversation = new Conversation({ prompt, response });
+    await newConversation.save();
 
     res.json({ response });
   } catch (error) {
@@ -110,6 +129,7 @@ export const generateChatResponse = async (req, res) => {
     res.status(500).json({ error: 'Error al procesar la solicitud', details: error.message });
   }
 };
+
 
 //////////////////// Historial ////////////////////
 
