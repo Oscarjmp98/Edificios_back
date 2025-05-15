@@ -21,7 +21,8 @@ export const getAulasPorEdificio = async (req, res) => {
   }
 
   try {
-    const aulas = await Aula.find({ edificio }, "nombre_salon imagenUrl");
+    // Modificado para incluir todos los campos necesarios
+    const aulas = await Aula.find({ edificio });
     res.status(200).json(aulas);
   } catch (error) {
     console.error(`Error al obtener aulas para el edificio ${edificio}:`, error);
